@@ -1,0 +1,25 @@
+{
+  "cluster_id": "CID-COVID19-HDFS-99201",
+  "namenode_host": "namenode-01.meridian.internal:9870",
+  "active_datanodes": [
+    "dn-01.storage:9866",
+    "dn-02.storage:9866",
+    "dn-03.storage:9866"
+  ],
+  "rack_topology": {
+    "dn-01": "/default-rack",
+    "dn-02": "/default-rack",
+    "dn-03": "/rack-02"
+  },
+  "total_capacity_gb": 500.0,
+  "dfs_used_gb": 48.6,
+  "dfs_remaining_gb": 451.4,
+  "dfs_used_pct": 9.72,
+  "total_blocks": 1842,
+  "missing_blocks": 0,
+  "corrupt_blocks": 0,
+  "under_replicated_blocks": 0,
+  "metastore_endpoint": "thrift://hive-metastore.meridian.internal:9083",
+  "hiveserver2_endpoint": "jdbc:hive2://hiveserver2.meridian.internal:10000/default",
+  "last_checkpoint": "2026-10-19 17:54:08"
+}

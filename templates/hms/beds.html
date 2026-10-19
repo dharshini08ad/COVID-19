@@ -1,0 +1,71 @@
+{% extends 'hms/base.html' %}
+{% load static %}
+
+{% block masthead %}
+<header class="masthead">
+  <div class="mast-left">
+    <p class="overline">Bed &amp; ICU management</p>
+    <h1 class="display-l">Capacity board</h1>
+    <p class="lede">Bed counts reflect wards and beds registered in the database.</p>
+  </div>
+  <div class="mast-right">
+    <p class="status-line"><strong>{{ total_available }}<small> available</small></strong> of {{ total_beds }} beds · {{ total_out_of_service }} out of service</p>
+  </div>
+</header>
+{% endblock %}
+
+{% block content %}
+<section class="panel">
+  <div class="panel-head">
+    <div>
+      <p class="overline">Registered bed inventory</p>
+      <h3 class="display-m">Bed &amp; ICU capacity</h3>
+    </div>
+  </div>
+  <div class="board">
+    {% for b in beds %}
+    {% widthratio b.occupied b.total 100 as pct %}
+    <div class="board-row">
+      <div class="board-ward">{{ b.ward }}<small>{{ b.occupied }} occupied · {{ b.available }} available · {{ b.out_of_service }} out of service</small></div>
+      <div class="board-nums">
+        <div><strong>{{ b.total }}</strong><span>Total</span></div>
+        <div><strong>{{ b.occupied }}</strong><span>Occupied</span></div>
+        <div><strong class="free">{{ b.available }}</strong><span>Available</span></div>
+      </div>
+      <span class="occ-chip {% if pct > 85 %}high{% elif pct > 60 %}mid{% else %}low{% endif %}">{{ pct }}%</span>
+    </div>
+    {% empty %}<p class="empty-row">No beds are configured. Create wards and bed records in Django admin before tracking capacity.</p>
+    {% endfor %}
+    <div style="display:none;" aria-hidden="true">No beds are configured</div>
+    {% if total_beds %}{% widthratio total_occupied total_beds 100 as total_pct %}
+    <div class="board-row">
+      <div class="board-ward">All wards<small>{{ total_beds }} total · {{ total_occupied }} occupied</small></div>
+      <div class="board-nums">
+        <div><strong>{{ total_beds }}</strong><span>Total</span></div>
+        <div><strong>{{ total_occupied }}</strong><span>Occupied</span></div>
+        <div><strong class="free">{{ total_available }}</strong><span>Available</span></div>
+      </div>
+      <span class="occ-chip {% if total_pct > 85 %}high{% elif total_pct > 60 %}mid{% else %}low{% endif %}">{{ total_pct }}%</span>
+    </div>
+    {% endif %}
+  </div>
+</section>
+
+<section class="panel" style="margin-top:24px;">
+  <div class="panel-head">
+    <div>
+      <p class="overline">Occupancy by ward</p>
+      <h3 class="display-m">Occupied vs free beds</h3>
+    </div>
+  </div>
+  {% if beds %}<div class="chart-frame">
+    <canvas id="bedChart"></canvas>
+  </div>{% else %}<p class="empty-row">A chart will appear when bed inventory is configured.</p>{% endif %}
+</section>
+{% endblock %}
+
+{% block extra_js %}
+{{ bed_chart_data|json_script:'bed-data' }}
+<script>window.__BED_DATA__ = JSON.parse(document.getElementById('bed-data').textContent);</script>
+<script src="{% static 'js/beds-chart.js' %}"></script>
+{% endblock %}

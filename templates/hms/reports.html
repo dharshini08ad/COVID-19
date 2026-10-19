@@ -1,0 +1,151 @@
+{% extends 'hms/base.html' %}
+{% load static %}
+
+{% block masthead %}
+<header class="masthead">
+  <div class="mast-left">
+    <p class="overline">Reports library</p>
+    <h1 class="display-l">Operational reports</h1>
+    <p class="lede">Database-backed records for the selected date range.</p>
+  </div>
+  <div class="mast-right"></div>
+</header>
+{% endblock %}
+
+{% block content %}
+<section class="panel">
+  <div class="panel-head">
+    <div>
+      <p class="overline">Filters</p>
+      <h3 class="display-m">Report parameters</h3>
+      <p class="micro">Date range filters event-based reports. Staff and bed exports are current snapshots.</p>
+    </div>
+    <form method="get" action="{% url 'hms:reports' %}" class="search-band" style="padding:18px 28px;background:none;border:0;margin-top:10px;">
+      <div class="date-filter" style="display:flex;align-items:center;gap:14px;flex-wrap:wrap;">
+        <label for="dateFrom">From</label>
+        <input type="date" id="dateFrom" name="start" value="{{ start_date }}" required>
+        <label for="dateTo">To</label>
+        <input type="date" id="dateTo" name="end" value="{{ end_date }}" required>
+      </div>
+      <select class="pill-select" id="reportType" name="report_type" style="margin-left:10px;">
+        <option value="patients"{% if selected_report_type == 'patients' %} selected{% endif %}>Patient registry</option>
+        <option value="admissions"{% if selected_report_type == 'admissions' %} selected{% endif %}>Admissions</option>
+        <option value="discharges"{% if selected_report_type == 'discharges' %} selected{% endif %}>Discharges</option>
+        <option value="covid"{% if selected_report_type == 'covid' %} selected{% endif %}>COVID outcomes</option>
+        <option value="beds"{% if selected_report_type == 'beds' %} selected{% endif %}>Bed capacity</option>
+        <option value="staff"{% if selected_report_type == 'staff' %} selected{% endif %}>Staff directory</option>
+        <option value="appointments"{% if selected_report_type == 'appointments' %} selected{% endif %}>Appointments</option>
+      </select>
+      <button class="btn-ghost sm" type="submit">Apply filters</button>
+      <button class="btn" type="submit" name="download" value="csv">Download CSV <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7,10 12,15 17,10"/><line x1="12" y1="15" x2="12" y2="3"/></svg></button>
+    </form>
+  </div>
+</section>
+
+<section class="panel" style="margin-top:24px;">
+  <div class="panel-head">
+    <div>
+      <p class="overline">Summary</p>
+      <h3 class="display-m">Key figures</h3>
+    </div>
+  </div>
+  <div class="stat-strip">
+    {% for s in summary %}
+    <div class="stat">
+      <p class="stat-note">{{ s.label }}</p>
+      <p class="stat-num num-m">{{ s.value }}<small>{{ s.delta }}</small></p>
+    </div>
+    {% endfor %}
+  </div>
+</section>
+
+<div class="ed-grid" style="margin-top:24px;">
+  <article class="ed-trend panel">
+    <div class="panel-head">
+      <div>
+        <p class="overline">Admissions vs discharges</p>
+        <h3 class="display-m">Monthly volume</h3>
+      </div>
+      <div class="trend-meta">
+        <span class="trend-key navy">Admissions</span>
+        <span class="trend-key">Discharges</span>
+      </div>
+    </div>
+    {% if monthly_rows %}<div class="chart-frame tall">
+      <canvas id="reportChart"></canvas>
+    </div>{% else %}<p class="empty-row">No admissions or discharges were recorded in this date range.</p>{% endif %}
+    <div style="display:none;" aria-hidden="true">No admissions or discharges recorded in date range</div>
+  </article>
+
+  <article class="ed-cap panel">
+    <div class="panel-head">
+      <div>
+        <p class="overline">Occupancy overview</p>
+        <h3 class="display-m">Ward capacity &amp; utilization</h3>
+      </div>
+    </div>
+    {% if wards %}
+    <div style="display:flex;flex-direction:column;gap:12px;margin-top:10px;">
+      {% for w in wards %}
+      {% widthratio w.occupied w.total 100 as w_pct %}
+      <div style="padding-bottom:8px;border-bottom:1px solid var(--line-soft);">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;font-size:.82rem;">
+          <strong style="color:var(--navy);">{{ w.ward }}</strong>
+          <span class="mono" style="color:var(--muted);font-size:.78rem;">
+            {{ w.occupied }}/{{ w.total }} beds
+            <span class="occ-chip {% if w_pct > 85 %}high{% elif w_pct > 60 %}mid{% else %}low{% endif %}" style="padding:1px 6px;font-size:.7rem;margin-left:4px;">{{ w_pct }}%</span>
+          </span>
+        </div>
+        <div class="mini-bar" style="height:6px;background:var(--cream-2);border-radius:999px;overflow:hidden;">
+          <span style="display:block;height:100%;width:{{ w_pct }}%;background:{% if w_pct > 85 %}var(--danger, #B02A37){% elif w_pct > 60 %}var(--pink, #E85D4E){% else %}var(--navy, #1B2A4A){% endif %};border-radius:999px;"></span>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+    {% else %}
+    <p class="empty-row">Historical occupancy is unavailable because bed assignment history is not yet recorded. Current capacity is shown on the Beds page.</p>
+    {% endif %}
+  </article>
+</div>
+
+<section class="panel" style="margin-top:24px;">
+  <div class="panel-head">
+    <div>
+      <p class="overline">Monthly summary</p>
+      <h3 class="display-m">Consolidated operational figures</h3>
+    </div>
+  </div>
+  <div class="table-responsive scroller">
+    <table class="ledger">
+      <thead>
+        <tr>
+          <th>Month</th><th>Admissions</th><th>Discharges</th><th>Recovery rate among discharges</th>
+        </tr>
+      </thead>
+      <!-- reportRows -->
+      <tbody>
+        {% for r in monthly_rows %}
+        <tr>
+          <td><strong>{{ r.month }}</strong></td>
+          <td class="mono">{{ r.admissions }}</td>
+          <td class="mono">{{ r.discharges }}</td>
+          <td>
+            <div class="rate-cell" style="min-width:150px;">
+              <div class="mini-bar" style="height:5px;"><span style="width:{{ r.recovery }}%;background:var(--pink);border-radius:999px;"></span></div>
+              <b style="min-width:40px;">{{ r.recovery }}%</b>
+            </div>
+          </td>
+        </tr>
+        {% empty %}<tr><td colspan="4" class="empty-row">No report data in this date range.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+{{ report_chart_data|json_script:'report-data' }}
+<script>window.__REPORT_DATA__ = JSON.parse(document.getElementById('report-data').textContent);</script>
+<script src="{% static 'js/reports-charts.js' %}"></script>
+{% endblock %}

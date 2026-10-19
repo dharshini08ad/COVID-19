@@ -1,0 +1,15 @@
+{
+  "format": "PARQUET",
+  "compression": "SNAPPY",
+  "schema": "CovidPatientSchema_v2",
+  "columns": 17,
+  "records": 199,
+  "block_id": "blk_1073741825_1001",
+  "replication": 3,
+  "datanodes": [
+    "dn-01:9866",
+    "dn-02:9866",
+    "dn-03:9866"
+  ],
+  "last_sync": "2026-10-19T17:54:08.967698+00:00"
+}

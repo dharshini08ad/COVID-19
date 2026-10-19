@@ -1,0 +1,17 @@
+version: '3.8'
+
+services:
+  web:
+    build: .
+    container_name: covid19_hms_server
+    ports:
+      - "8000:8000"
+    environment:
+      - DJANGO_DEBUG=false
+      - DJANGO_SECRET_KEY=production-secret-key-change-in-production-1234567890
+      - ALLOWED_HOSTS=localhost,127.0.0.1,web
+      - CSRF_TRUSTED_ORIGINS=http://localhost:8000,http://127.0.0.1:8000
+    volumes:
+      - ./bigdata_lake:/app/bigdata_lake
+      - ./db.sqlite3:/app/db.sqlite3
+    restart: unless-stopped

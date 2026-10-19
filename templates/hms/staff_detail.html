@@ -1,0 +1,33 @@
+{% extends 'hms/base.html' %}
+
+{% block masthead %}
+<header class="masthead">
+  <div class="mast-left">
+    <p class="overline">Staff profile</p>
+    <h1 class="display-l">{{ member.name }}</h1>
+    <p class="lede">{{ member.role }} · {{ member.department }}</p>
+  </div>
+  <div class="mast-right"><a class="btn-ghost" href="{% url 'hms:staff_edit' member.pk %}">Edit record</a></div>
+</header>
+{% endblock %}
+
+{% block content %}
+<section class="panel detail-grid">
+  <article>
+    <p class="overline">Employment details</p>
+    <dl class="facts">
+      <dt>Role</dt><dd>{{ member.role }}</dd>
+      <dt>Department</dt><dd>{{ member.department }}</dd>
+      <dt>Availability</dt><dd>{% if member.available %}Available{% else %}Unavailable{% endif %}</dd>
+      <dt>Shift</dt><dd>{{ member.shift|default:'Not recorded' }}</dd>
+      <dt>Experience</dt><dd>{{ member.experience|default:'Not recorded' }}</dd>
+      <dt>Active patients</dt><dd>{{ active_patient_count }}</dd>
+    </dl>
+  </article>
+  <aside>
+    <p class="overline">Contact</p>
+    <p>{{ member.email|default:'Email not recorded' }}</p>
+    <p>{{ member.phone|default:'Phone not recorded' }}</p>
+  </aside>
+</section>
+{% endblock %}

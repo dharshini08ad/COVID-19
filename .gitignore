@@ -1,0 +1,30 @@
+# Python bytecode
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+
+# Virtual Environment
+venv/
+env/
+ENV/
+.venv/
+
+# Environment Variables
+.env
+.env.local
+
+# Django Cache & Logs
+*.log
+local_settings.py
+server*.log
+
+# Static cache if rebuilt
+staticfiles/
+
+# IDE & OS files
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/

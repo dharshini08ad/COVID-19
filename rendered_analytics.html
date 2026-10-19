@@ -1,0 +1,396 @@
+
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Meridian Care Hospital Management</title>
+
+  <!-- ============ STYLESHEET ============ -->
+  <link href="/static/css/style.css" rel="stylesheet">
+
+  <!-- ============ FONTS ============ -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital,wght@0,400;0,500;0,600;1,400&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <style>
+    .fonts-loaded body { font-family: var(--sans); }
+    .fonts-loaded h1, .fonts-loaded h2, .fonts-loaded h3 { font-family: var(--serif); }
+    .fonts-loaded .brand-word { font-family: var(--serif); }
+    .fonts-loaded .hero-name { font-family: var(--serif); }
+    .fonts-loaded .display-xl, .fonts-loaded .display-l, .fonts-loaded .display-m { font-family: var(--serif); }
+    .fonts-loaded .num-xl, .fonts-loaded .num-l, .fonts-loaded .num-m { font-family: var(--serif); }
+    .fonts-loading body { visibility: hidden; }
+    .fonts-loaded .fonts-loading, .fonts-loaded .fonts-loading body { visibility: visible; }
+  </style>
+</head>
+
+<body>
+
+  <!-- ============ NAVIGATION RAIL ============ -->
+  
+  <aside class="rail" id="appSidebar" aria-label="Main navigation">
+    <div class="rail-brand">
+      <a href="/dashboard/" class="brand-logo" aria-label="Meridian Care home">
+        <span class="brand-glyph">M</span>
+        <span class="brand-word">Meridian<span style="font-weight:600">Care</span></span>
+      </a>
+    </div>
+
+    <nav class="rail-nav">
+      <div class="rail-section">
+        <div class="rail-section-header">
+          <span class="rail-section-label">Main</span>
+        </div>
+        <ul class="rail-list">
+          <li><a class="rail-link" href="/dashboard/">
+            <span class="rail-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg></span>
+            <span>Dashboard</span>
+          </a></li>
+          <li><a class="rail-link" href="/patients/">
+            <span class="rail-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg></span>
+            <span>Patients</span>
+          </a></li>
+          <li><a class="rail-link" href="/staff/">
+            <span class="rail-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></span>
+            <span>Staff</span>
+          </a></li>
+        </ul>
+      </div>
+
+      <div class="rail-section">
+        <div class="rail-section-header">
+          <span class="rail-section-label">Operations</span>
+        </div>
+        <ul class="rail-list">
+          <li><a class="rail-link" href="/appointments/">
+            <span class="rail-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></span>
+            <span>Appointments</span>
+          </a></li>
+          <li><a class="rail-link" href="/beds/">
+            <span class="rail-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21v-4"/><path d="M7 21v-8"/><path d="M11 21V3"/><path d="M15 21v-4"/><path d="M19 21V9"/></svg></span>
+            <span>Beds</span>
+          </a></li>
+          <li><a class="rail-link is-active" href="/analytics/">
+            <span class="rail-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 20V10"/><path d="M12 20V4"/><path d="M6 20v-6"/></svg></span>
+            <span>Analytics</span>
+          </a></li>
+          <li><a class="rail-link" href="/reports/">
+            <span class="rail-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14,2 14,8 20,8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg></span>
+            <span>Reports</span>
+          </a></li>
+        </ul>
+      </div>
+    </nav>
+
+    
+  </aside>
+
+
+  <div class="dock" id="mobileDock">
+    <a href="/dashboard/" class="dock-item">
+      <span class="dock-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg></span>
+      <span class="dock-label">Dashboard</span>
+    </a>
+    <a href="/patients/" class="dock-item">
+      <span class="dock-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg></span>
+      <span class="dock-label">Patients</span>
+    </a>
+    <a href="/appointments/" class="dock-item">
+      <span class="dock-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></span>
+      <span class="dock-label">Appts</span>
+    </a>
+    <a href="/beds/" class="dock-item">
+      <span class="dock-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21v-4"/><path d="M7 21v-8"/><path d="M11 21V3"/><path d="M15 21v-4"/><path d="M19 21V9"/></svg></span>
+      <span class="dock-label">Beds</span>
+    </a>
+    <a href="/staff/" class="dock-item">
+      <span class="dock-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></span>
+      <span class="dock-label">Staff</span>
+    </a>
+  </div>
+  
+
+  <div class="shell " id="shell">
+    
+    <div class="utility-bar">
+      <button class="util-btn menu-btn" id="sidebarToggle" aria-label="Toggle navigation">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="width:18px;height:18px;"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+      </button>
+      <p class="crumb">Meridian Care <span class="sep">/</span> <strong>Hospital analytics</strong> <span class="demo-crumb">Live records</span></p>
+      <div class="util-actions">
+        <div class="who">
+          <div class="who-avatar">D</div>
+          <div class="who-meta"><strong>Local development</strong><small>Meridian Care</small></div>
+        </div>
+      </div>
+    </div>
+    
+    
+    <main id="main" class="page">
+      
+<header class="masthead">
+  <div class="mast-left">
+    <p class="overline">COVID analytics</p>
+    <h1 class="display-l">Data analysis</h1>
+    <p class="lede">Recorded admissions and recoveries for the selected reporting period.</p>
+  </div>
+  <div class="mast-right"></div>
+</header>
+
+      
+<form method="get" class="search-band" action="/analytics/">
+  <label for="analyticsStart">From</label><input id="analyticsStart" type="date" name="start" value="2025-10-20" required>
+  <label for="analyticsEnd">To</label><input id="analyticsEnd" type="date" name="end" value="2026-10-19" required>
+  <button class="btn" type="submit">Update analytics</button>
+</form>
+<section class="panel">
+  <div class="panel-head">
+    <div>
+      <p class="overline">Selected period</p>
+      <h3 class="display-m">COVID-19 overview</h3>
+    </div>
+  </div>
+  <div class="stat-strip">
+    <div class="stat">
+      <p class="stat-note">New positive cases</p>
+      <p class="stat-num num-m">6</p>
+    </div>
+    <div class="stat">
+      <p class="stat-note">Recovery rate</p>
+      <p class="stat-num num-m">—</p>
+    </div>
+    <div class="stat">
+      <p class="stat-note">Active now</p>
+      <p class="stat-num num-m">6<small>not discharged</small></p>
+    </div>
+    <div class="stat">
+      <p class="stat-note">Recoveries recorded</p>
+      <p class="stat-num num-m">0</p>
+    </div>
+  </div>
+</section>
+
+<div class="ed-grid" style="margin-top:24px;">
+  <article class="ed-trend panel">
+    <div class="panel-head">
+      <div>
+        <p class="overline">Monthly activity</p>
+        <h3 class="display-m">New positive cases &amp; recoveries</h3>
+      </div>
+      <div class="trend-meta">
+        <span class="trend-key navy">Cases</span>
+        <span class="trend-key">Recovered</span>
+      </div>
+    </div>
+    <div class="chart-frame tall">
+      <canvas id="monthlyChart"></canvas>
+    </div>
+  </article>
+
+  <article class="ed-cap panel">
+    <div class="panel-head">
+      <div>
+        <p class="overline">Daily trend</p>
+        <h3 class="display-m">Active cases, admissions &amp; recoveries</h3>
+      </div>
+      <div class="trend-meta">
+        <span class="trend-key navy">New positive</span>
+        <span class="trend-key">Recovered</span>
+        <span class="trend-key" style="color:var(--pink-deep);">Active estimate</span>
+      </div>
+    </div>
+    <div class="chart-frame">
+      <canvas id="dailyChart"></canvas>
+    </div>
+  </article>
+</div>
+
+<section class="panel" style="margin-top:24px;">
+  <div class="panel-head">
+    <div>
+      <p class="overline">District-wise statistics</p>
+      <h3 class="display-m">Cumulative reported cases</h3>
+    </div>
+  </div>
+  <div class="table-responsive scroller">
+    <table class="ledger">
+      <thead>
+        <tr>
+          <th>District</th><th>Cases</th><th>Active</th><th>Recovered</th><th>Recovery rate</th>
+        </tr>
+      </thead>
+      <tbody>
+        
+        <tr>
+          <td><strong>Chennai North</strong></td>
+          <td class="mono">1</td>
+          <td class="mono">1</td>
+          <td>0</td>
+          <td>
+            <div class="rate-cell" style="min-width:170px;">
+              <div class="mini-bar" style="height:5px;"><span style="width:0.0%;background:var(--pink);border-radius:999px;"></span></div>
+              <b style="min-width:40px;">0.0%</b>
+            </div>
+          </td>
+        </tr>
+        
+        <tr>
+          <td><strong>Chennai South</strong></td>
+          <td class="mono">1</td>
+          <td class="mono">1</td>
+          <td>0</td>
+          <td>
+            <div class="rate-cell" style="min-width:170px;">
+              <div class="mini-bar" style="height:5px;"><span style="width:0.0%;background:var(--pink);border-radius:999px;"></span></div>
+              <b style="min-width:40px;">0.0%</b>
+            </div>
+          </td>
+        </tr>
+        
+        <tr>
+          <td><strong>Madurai</strong></td>
+          <td class="mono">1</td>
+          <td class="mono">1</td>
+          <td>0</td>
+          <td>
+            <div class="rate-cell" style="min-width:170px;">
+              <div class="mini-bar" style="height:5px;"><span style="width:0.0%;background:var(--pink);border-radius:999px;"></span></div>
+              <b style="min-width:40px;">0.0%</b>
+            </div>
+          </td>
+        </tr>
+        
+        <tr>
+          <td><strong>Tiruchirappalli</strong></td>
+          <td class="mono">1</td>
+          <td class="mono">1</td>
+          <td>0</td>
+          <td>
+            <div class="rate-cell" style="min-width:170px;">
+              <div class="mini-bar" style="height:5px;"><span style="width:0.0%;background:var(--pink);border-radius:999px;"></span></div>
+              <b style="min-width:40px;">0.0%</b>
+            </div>
+          </td>
+        </tr>
+        
+        <tr>
+          <td><strong>Tirunelveli</strong></td>
+          <td class="mono">1</td>
+          <td class="mono">1</td>
+          <td>0</td>
+          <td>
+            <div class="rate-cell" style="min-width:170px;">
+              <div class="mini-bar" style="height:5px;"><span style="width:0.0%;background:var(--pink);border-radius:999px;"></span></div>
+              <b style="min-width:40px;">0.0%</b>
+            </div>
+          </td>
+        </tr>
+        
+        <tr>
+          <td><strong>Vellore</strong></td>
+          <td class="mono">1</td>
+          <td class="mono">1</td>
+          <td>0</td>
+          <td>
+            <div class="rate-cell" style="min-width:170px;">
+              <div class="mini-bar" style="height:5px;"><span style="width:0.0%;background:var(--pink);border-radius:999px;"></span></div>
+              <b style="min-width:40px;">0.0%</b>
+            </div>
+          </td>
+        </tr>
+        
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<div class="ed-grid" style="margin-top:24px;">
+  <article class="ed-res panel">
+    <div class="panel-head">
+      <div>
+        <p class="overline">District load</p>
+        <h3 class="display-m">Active cases share</h3>
+      </div>
+    </div>
+    <div class="chart-frame">
+      <canvas id="districtChart"></canvas>
+    </div>
+  </article>
+</div>
+
+<section class="panel" style="margin-top:24px;">
+  <div class="panel-head">
+    <div><p class="overline">Big-data connectivity</p><h3 class="display-m">Hadoop, HDFS &amp; Hive</h3></div>
+    <span class="tag">Not configured</span>
+  </div>
+  <p>HDFS: Not configured. Set HDFS_WEBHDFS_URL to a WebHDFS NameNode endpoint.</p>
+  <p>Hive: Not configured. Set HIVE_JDBC_URL and install/configure Beeline to run Hive queries.</p>
+
+  <div style="margin: 16px 0; padding: 16px; background: var(--gray-100); border-radius: 8px;">
+    <p class="overline" style="margin-bottom: 12px;">Local Data Export & Hive Simulation</p>
+    <div style="display: flex; gap: 12px; flex-wrap: wrap;">
+      <form method="get" action="/analytics/export/" style="display: inline;">
+        <select name="type" style="padding: 8px; border-radius: 4px; border: 1px solid var(--gray-300);">
+          <option value="patients">Patients (CSV)</option>
+          <option value="admissions">Admissions (CSV)</option>
+          <option value="bed_occupancy">Bed Occupancy (CSV)</option>
+        </select>
+        <button type="submit" class="btn">Export to HDFS Format</button>
+      </form>
+      <form method="get" action="/analytics/query/" style="display: inline;">
+        <select name="query" style="padding: 8px; border-radius: 4px; border: 1px solid var(--gray-300);">
+          <option value="district_wise">District-wise Cases</option>
+          <option value="icu_length_of_stay">ICU Length of Stay</option>
+          <option value="recovery_rate_trend">Recovery Rate Trend</option>
+          <option value="bed_occupancy_hotspots">Bed Occupancy Hotspots</option>
+        </select>
+        <button type="submit" class="btn">Run Hive Query Simulation</button>
+      </form>
+    </div>
+    <p class="micro" style="margin-top: 8px;">Export generates CSV files ready for HDFS upload. Query simulation runs analytics on local SQLite data similar to Hive queries.</p>
+  </div>
+
+  <p class="empty-row">No HDFS dataset paths are configured or available.</p>
+  <p class="micro">No local SQL query or file is represented as an HDFS dataset or Hive result. Active-case estimates start from recorded active patients and subtract positive-cohort discharges; no death data is captured.</p>
+</section>
+
+
+
+    </main>
+  </div>
+
+  <div class="rail-backdrop" id="sidebarBackdrop"></div>
+  <div class="toast-mock" id="toastMock" role="status" aria-live="polite"></div>
+
+
+  <!-- ============ SCRIPTS ============ -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js" defer></script>
+  <script src="/static/js/app.js" defer></script>
+  
+<script id="analytics-data" type="application/json">{"monthlyLabels": ["Oct 2025", "Nov 2025", "Dec 2025", "Jan 2026", "Feb 2026", "Mar 2026", "Apr 2026", "May 2026", "Jun 2026", "Jul 2026", "Aug 2026", "Sep 2026", "Oct 2026"], "monthlyCases": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 6], "monthlyRecovered": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], "dailyLabels": ["Sep 20", "Sep 21", "Sep 22", "Sep 23", "Sep 24", "Sep 25", "Sep 26", "Sep 27", "Sep 28", "Sep 29", "Sep 30", "Oct 01", "Oct 02", "Oct 03", "Oct 04", "Oct 05", "Oct 06", "Oct 07", "Oct 08", "Oct 09", "Oct 10", "Oct 11", "Oct 12", "Oct 13", "Oct 14", "Oct 15", "Oct 16", "Oct 17", "Oct 18", "Oct 19"], "dailyNew": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 1, 1, 0, 1, 0, 1, 0, 0, 0], "dailyRecovered": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], "dailyActive": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 2, 2, 3, 4, 4, 5, 5, 6, 6, 6, 6], "districtNames": ["Chennai North", "Chennai South", "Madurai", "Tiruchirappalli", "Tirunelveli", "Vellore"], "districtActive": [1, 1, 1, 1, 1, 1]}</script>
+<script>window.__ANALYTICS_DATA__ = JSON.parse(document.getElementById('analytics-data').textContent);</script>
+<script src="/static/js/analytics-charts.js"></script>
+
+  <script>
+    (function() {
+      var link = document.createElement('link');
+      link.rel = 'stylesheet';
+      link.href = 'https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital,wght@0,400;0,500;1,400&family=DM+Sans:wght@400;500;600;700&display=swap';
+      document.head.appendChild(link);
+
+      function loadFonts() {
+        document.documentElement.classList.add('fonts-loaded');
+      }
+
+      if (document.fonts && document.fonts.ready) {
+        document.fonts.ready.then(loadFonts);
+      } else {
+        setTimeout(loadFonts, 800);
+      }
+    })();
+  </script>
+</body>
+
+</html>

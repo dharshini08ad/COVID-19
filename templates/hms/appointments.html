@@ -1,0 +1,124 @@
+{% extends 'hms/base.html' %}
+{% load static %}
+
+{% block masthead %}
+<header class="masthead">
+  <div class="mast-left">
+    <p class="overline">Appointments &amp; admissions</p>
+    <h1 class="display-l">Scheduling</h1>
+    <p class="lede">Today and upcoming appointments across all departments.</p>
+  </div>
+  <div class="mast-right"></div>
+</header>
+{% endblock %}
+
+{% block content %}
+<section class="panel">
+  <div class="panel-head">
+    <div>
+      <p class="overline">Filter</p>
+      <h3 class="display-m">Appointments &amp; status</h3>
+    </div>
+    <form method="get" action="{% url 'hms:appointments' %}">
+    <select class="pill-select" id="apptStatusFilter" name="status" aria-label="Filter by status">
+      <option value="">All statuses</option>
+      {% for value, label in appointment_statuses %}<option value="{{ value }}"{% if selected_status == value %} selected{% endif %}>{{ label }}</option>{% endfor %}
+    </select>
+    <button class="btn-ghost sm" type="submit">Apply</button>
+    </form>
+    <span class="legend-chip k-scheduled">Scheduled</span>
+    <span class="legend-chip k-confirmed">Confirmed</span>
+    <span class="legend-chip k-completed">Completed</span>
+    <span class="legend-chip k-cancelled">Cancelled</span>
+  </div>
+  <button class="btn" id="newApptBtn">Schedule appointment <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px;"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></button>
+</section>
+
+<div class="ed-grid" style="margin-top:24px;">
+  <article class="ed-stats panel">
+    <div class="panel-head">
+      <div>
+        <p class="overline">Today &amp; upcoming</p>
+        <h3 class="display-m">Appointment list</h3>
+      </div>
+    </div>
+    <div class="table-responsive scroller">
+      <table class="ledger" id="apptTable">
+        <thead>
+          <tr>
+            <th>ID</th><th>Patient</th><th>Doctor · department</th>
+            <th>Date &amp; time</th><th>Type</th><th>Status</th><th></th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for a in appointments %}
+          <tr data-status="{{ a.status }}">
+            <td class="mono">{{ a.id_label }}</td>
+            <td>
+              <div class="identity">
+                <span class="id-tile">{{ a.patient|slice:':1' }}</span>
+                <span class="id-name">{{ a.patient.name }}</span>
+                <span class="id-sub">{{ a.department }}</span>
+              </div>
+            </td>
+            <td>{{ a.doctor.name }}</td>
+            <td>{{ a.date }}<br><span class="mono" style="font-size:.78rem;color:var(--muted-2);">{{ a.time }}</span></td>
+            <td>{{ a.appointment_type }}</td>
+            <td><span class="tag t-{{ a.status|lower }} t-lg">{{ a.status }}</span></td>
+            <td>{% if a.status == 'Scheduled' or a.status == 'Confirmed' %}<a class="btn-ghost sm" href="{% url 'hms:appointment_edit' a.pk %}">Reschedule</a> <form method="post" action="{% url 'hms:appointment_cancel' a.pk %}">{% csrf_token %}<button class="btn-ghost sm" type="submit">Cancel</button></form>{% endif %}</td>
+          </tr>
+          {% empty %}<tr><td colspan="7" class="empty-row">No appointments found. Register a patient and staff member, then schedule an appointment.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </article>
+
+  <article class="ed-cap panel">
+    <div class="panel-head">
+      <div>
+        <p class="overline">Currently admitted patients</p>
+        <h3 class="display-m">Active admissions ({{ admissions|length }})</h3>
+      </div>
+    </div>
+    <ul class="chron">
+      {% for p in admissions %}
+      <li>
+        <time>{{ p.admitted_on|date:"M d, Y" }}</time>
+        <div>
+          <p class="who-line"><a href="{% url 'hms:patient_detail' p.pk %}">{{ p.name }}</a><small>{% if p.ward %}{{ p.ward.name }}{% else %}Ward unassigned{% endif %} · {% if p.bed %}{{ p.bed.number }}{% else %}Bed unassigned{% endif %}</small></p>
+        </div>
+        <span class="tag t-{{ p.covid_status|lower }}">{{ p.covid_status }}</span>
+      </li>
+      {% empty %}
+      <li style="padding:16px 0;border-top:0;"><p style="font-size:.82rem;color:var(--muted-2);">No active admissions currently.</p></li>
+      {% endfor %}
+    </ul>
+  </article>
+</div>
+
+<!-- Schedule modal (mock) -->
+<div class="modal-lux" id="apptModal"{% if not show_appointment_form %} hidden{% endif %}>
+  <div class="modal-card">
+    <div class="panel-head">
+      <div>
+        <p class="overline">Scheduling</p>
+        <h3 class="display-m">{% if page_title == 'Reschedule appointment' %}Reschedule appointment{% else %}Schedule appointment{% endif %}</h3>
+      </div>
+      <button class="icon-quiet" id="closeApptModal" aria-label="Close">✕</button>
+    </div>
+    <form class="lux-form" id="apptForm" method="post" action="{{ appointment_action }}">
+      {% csrf_token %}{{ appointment_form.non_field_errors }}
+      {% for field in appointment_form %}<div class="field"><label for="{{ field.id_for_label }}">{{ field.label }}</label>{{ field }}{% for error in field.errors %}<small class="form-error">{{ error }}</small>{% endfor %}</div>{% endfor %}
+      <div class="form-actions">
+        <button type="button" class="btn-ghost" id="cancelApptModal">Cancel</button>
+        <button type="submit" class="btn">{% if page_title == 'Reschedule appointment' %}Save new time{% else %}Schedule appointment{% endif %}</button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/appointments.js' %}"></script>
+{% endblock %}

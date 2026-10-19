@@ -1,0 +1,13 @@
+{
+  "format": "PARQUET",
+  "compression": "SNAPPY",
+  "records": 199,
+  "block_id": "blk_1073741829_1005",
+  "replication": 3,
+  "datanodes": [
+    "dn-01:9866",
+    "dn-02:9866",
+    "dn-03:9866"
+  ],
+  "last_sync": "2026-10-19T17:54:08.967698+00:00"
+}

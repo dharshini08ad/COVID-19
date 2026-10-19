@@ -1,0 +1,98 @@
+{% extends 'hms/base.html' %}
+{% load static %}
+
+{% block masthead %}
+<header class="masthead">
+  <div class="mast-left">
+    <p class="overline">Doctors &amp; staff</p>
+    <h1 class="display-l">Staff directory</h1>
+    <p class="lede">Staff organised by department, role and availability. {{ staff|length }} active members.</p>
+  </div>
+  <div class="mast-right"></div>
+</header>
+{% endblock %}
+
+{% block content %}
+<form class="search-band" method="get" action="{% url 'hms:staff' %}">
+  <div class="big-search">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:20px;height:20px;"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+    <input type="search" id="staffSearch" name="q" value="{{ search_query }}" placeholder="Search name, role or department…" aria-label="Search staff">
+  </div>
+  <select class="pill-select" id="deptFilter" name="department" aria-label="Filter by department">
+    <option value="">All departments</option>
+    {% for department in departments %}<option value="{{ department }}"{% if selected_department == department %} selected{% endif %}>{{ department }}</option>{% endfor %}
+  </select>
+  <select class="pill-select" id="availabilityFilter" name="availability" aria-label="Filter by availability">
+    <option value="">All availability</option>
+    <option value="available"{% if selected_availability == 'available' %} selected{% endif %}>Available</option>
+    <option value="unavailable"{% if selected_availability == 'unavailable' %} selected{% endif %}>Unavailable</option>
+  </select>
+  <select class="pill-select" id="roleFilter" name="role" aria-label="Filter by role">
+    <option value="">All roles</option>
+    {% for role in roles %}<option value="{{ role }}"{% if selected_role == role %} selected{% endif %}>{{ role }}</option>{% endfor %}
+  </select>
+  <button type="submit" class="btn-ghost sm">Apply filters</button>
+  <button type="button" class="btn" id="addStaffBtn">Add staff <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px;"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></button>
+</form>
+
+<section class="panel">
+  <div class="panel-head">
+    <div>
+      <p class="overline">Staff roster</p>
+      <h3 class="display-m">Department &amp; availability</h3>
+    </div>
+  </div>
+  <div class="roster" id="roster">
+    {% for s in staff %}
+    <article class="person">
+      <div class="person-top">
+        <div>
+          <div class="person-name">{{ s.name }}</div>
+          <p class="person-role">{{ s.role }} <b>{{ s.department }}</b></p>
+        </div>
+        <span class="avail {% if s.available %}on{% else %}off{% endif %}">{% if s.available %}Available{% else %}On leave{% endif %}</span>
+      </div>
+      <ul class="person-meta">
+        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px;"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="22"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg> {% if s.shift %}{{ s.shift }}{% else %}Shift not specified{% endif %}</li>
+        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px;"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg> {% if s.experience %}{{ s.experience }}{% else %}Experience not specified{% endif %}</li>
+        <li>{{ s.active_patients }} active patient{{ s.active_patients|pluralize }}</li>
+        {% if s.phone %}<li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px;"><path d="M5 5a2 2 0 0 1 2-2h11a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2z"/></svg> {{ s.phone }}</li>{% endif %}
+      </ul>
+      <div class="person-actions">
+        <a class="btn-ghost sm" href="{% url 'hms:staff_edit' s.pk %}">Edit</a>
+        <a class="btn-ghost sm" href="{% url 'hms:staff_detail' s.pk %}">View</a>
+      </div>
+    </article>
+    {% empty %}<p class="empty-row">No staff records match these filters. Add a staff member to get started.</p>
+    {% endfor %}
+  </div>
+</section>
+
+<!-- Add staff modal (mock) -->
+<div class="modal-lux" id="staffModal"{% if not show_staff_form %} hidden{% endif %}>
+  <div class="modal-card">
+    <div class="panel-head">
+      <div>
+        <p class="overline">Add staff member</p>
+        <h3 class="display-m">New staff record</h3>
+      </div>
+      <button class="icon-quiet" id="closeStaffModal" aria-label="Close">✕</button>
+    </div>
+    <form class="lux-form" id="staffForm" method="post" action="{% url 'hms:staff' %}">
+      {% csrf_token %}
+      {{ staff_form.non_field_errors }}
+      {% for field in staff_form %}
+      <div class="field"><label for="{{ field.id_for_label }}">{{ field.label }}</label>{{ field }}{% for error in field.errors %}<small class="form-error">{{ error }}</small>{% endfor %}</div>
+      {% endfor %}
+      <div class="form-actions">
+        <button type="button" class="btn-ghost" id="cancelStaffModal">Cancel</button>
+        <button type="submit" class="btn">Save staff member</button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/staff.js' %}"></script>
+{% endblock %}

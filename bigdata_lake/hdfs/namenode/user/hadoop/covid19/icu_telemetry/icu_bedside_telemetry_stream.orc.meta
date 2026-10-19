@@ -1,0 +1,14 @@
+{
+  "format": "ORC",
+  "compression": "SNAPPY",
+  "stripes": 5,
+  "records": 2388,
+  "block_id": "blk_1073741827_1003",
+  "replication": 3,
+  "datanodes": [
+    "dn-01:9866",
+    "dn-02:9866",
+    "dn-03:9866"
+  ],
+  "last_sync": "2026-10-19T17:54:08.967698+00:00"
+}

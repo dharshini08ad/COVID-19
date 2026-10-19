@@ -1,0 +1,96 @@
+{% extends 'hms/base.html' %}
+{% load static %}
+
+{% block masthead %}
+<header class="masthead">
+  <div class="mast-left">
+    <p class="overline">Patient management</p>
+    <h1 class="display-l">Patient directory</h1>
+    <p class="lede">Searchable register of patient records stored in the hospital database. {{ total }} records.</p>
+  </div>
+  <div class="mast-right">
+    <a href="{% url 'hms:patient_register' %}" class="btn">Register patient <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px;transform:translateY(1px);"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></a>
+  </div>
+</header>
+{% endblock %}
+
+{% block content %}
+<form class="search-band" method="get" action="{% url 'hms:patients' %}">
+  <div class="big-search">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:20px;height:20px;"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+    <input type="search" id="patientSearch" name="q" value="{{ search_query }}" placeholder="Search by name, UHID or doctor…" aria-label="Search patients">
+  </div>
+  <select class="pill-select" id="statusFilter" name="status" aria-label="Filter by COVID status">
+    <option value="">All statuses</option>
+    <option value="Positive"{% if selected_status == 'Positive' %} selected{% endif %}>Positive</option>
+    <option value="Recovered"{% if selected_status == 'Recovered' %} selected{% endif %}>Recovered</option>
+    <option value="Negative"{% if selected_status == 'Negative' %} selected{% endif %}>Negative</option>
+  </select>
+  <select class="pill-select" id="dischargeFilter" name="discharge" aria-label="Filter by discharge">
+    <option value="">All patients</option>
+    <option value="admitted"{% if selected_discharge == 'admitted' %} selected{% endif %}>Currently admitted</option>
+    <option value="discharged"{% if selected_discharge == 'discharged' %} selected{% endif %}>Discharged</option>
+  </select>
+  <select class="pill-select" id="patientDepartmentFilter" name="department" aria-label="Filter by department">
+    <option value="">All departments</option>
+    {% for department in departments %}<option value="{{ department }}"{% if selected_department == department %} selected{% endif %}>{{ department }}</option>{% endfor %}
+  </select>
+  <button type="submit" class="btn-ghost sm">Apply filters</button>
+</form>
+
+<section class="panel">
+  <div class="panel-head">
+    <div>
+      <p class="overline">Patient registry</p>
+      <h3 class="display-m">Active patient list</h3>
+    </div>
+    <p class="lede" style="max-width:none;">Fictional demo records — <span id="visibleCount">{{ total }}</span> shown.</p>
+  </div>
+  <div class="table-responsive scroller">
+    <table class="ledger" id="patientTable">
+      <thead>
+        <tr>
+          <th>Patient</th><th>UHID</th><th>Age · Gender</th>
+          <th>COVID status</th><th>Severity</th><th>Ward / bed</th>
+          <th>Admitted</th><th>Status</th><th style="width:60px;"></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for p in patients %}
+        <tr>
+          <td>
+            <a href="{% url 'hms:patient_detail' p.id %}" class="identity">
+              <span class="id-tile blush">{{ p.name|slice:':1' }}</span>
+              <span class="id-name">{{ p.name }}</span>
+              <span class="id-sub">{{ p.uhid }}</span>
+            </a>
+          </td>
+          <td class="mono">{{ p.uhid }}</td>
+          <td>{{ p.age }} · {{ p.gender }}</td>
+          <td><span class="tag t-{{ p.covid_status|lower }}">{{ p.covid_status }}</span></td>
+          <td><span class="sev {{ p.severity|lower }}">{{ p.severity }}</span></td>
+          <td>{% if p.ward %}{{ p.ward.name }}{% else %}Unassigned{% endif %} · {% if p.bed %}{{ p.bed.number }}{% else %}—{% endif %}</td>
+          <td>{{ p.admitted_on|date:"M d, Y" }}</td>
+          <td><span class="tag t-{% if p.discharged %}discharged{% else %}admitted{% endif %}">{% if p.discharged %}Discharged{% else %}Admitted{% endif %}</span></td>
+          <td><a href="{% url 'hms:patient_detail' p.id %}" class="icon-quiet" title="View details">→</a></td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="9" class="empty-row">No patient records match these filters. <a href="{% url 'hms:patient_register' %}">Register a patient</a>.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  <p class="empty-row" id="emptyRow" hidden>No patients match your filters.</p>
+  {% if page_obj.paginator.num_pages > 1 %}
+  <nav class="pagination" aria-label="Patient pages">
+    {% if page_obj.has_previous %}<a class="btn-ghost sm" href="?q={{ search_query|urlencode }}&amp;status={{ selected_status|urlencode }}&amp;discharge={{ selected_discharge|urlencode }}&amp;department={{ selected_department|urlencode }}&amp;page={{ page_obj.previous_page_number }}">Previous</a>{% endif %}
+    <span>Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>
+    {% if page_obj.has_next %}<a class="btn-ghost sm" href="?q={{ search_query|urlencode }}&amp;status={{ selected_status|urlencode }}&amp;discharge={{ selected_discharge|urlencode }}&amp;department={{ selected_department|urlencode }}&amp;page={{ page_obj.next_page_number }}">Next</a>{% endif %}
+  </nav>
+  {% endif %}
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/patients.js' %}"></script>
+{% endblock %}

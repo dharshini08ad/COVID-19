@@ -1,0 +1,84 @@
+{% extends 'hms/base.html' %}
+{% load static %}
+
+{% block masthead %}
+<header class="masthead">
+  <div class="mast-left">
+    <a href="{% url 'hms:patients' %}" class="btn-ghost sm">← Back to directory</a>
+    <h1 class="display-m">{{ patient.name }}</h1>
+    <p class="lede">{{ patient.uhid }} · {{ patient.age }} yrs · {{ patient.gender }} · {{ patient.blood_group }}</p>
+  </div>
+  <div class="mast-right">
+    <span class="tag t-{{ patient.covid_status|lower }} t-lg">{{ patient.covid_status }}</span>
+    <a class="btn-ghost" href="{% url 'hms:patient_edit' patient.pk %}">Edit record</a>
+  </div>
+</header>
+{% endblock %}
+
+{% block content %}
+<section class="detail-grid">
+  <article class="panel">
+    <div class="panel-head">
+      <div>
+        <p class="overline">Patient identity</p>
+        <h3 class="display-m">{{ patient.name }}</h3>
+      </div>
+      <span class="tag t-{{ patient.covid_status|lower }} t-lg">{{ patient.covid_status }}</span>
+    </div>
+    <div class="id-rule">
+      <div><span>UHID</span><strong>{{ patient.uhid }}</strong></div>
+      <div><span>Age</span><strong>{{ patient.age }}</strong></div>
+      <div><span>Gender</span><strong>{{ patient.gender }}</strong></div>
+      <div><span>Blood group</span><strong>{{ patient.blood_group }}</strong></div>
+      <div><span>Ward / bed</span><strong>{% if patient.ward %}{{ patient.ward.name }}{% else %}Unassigned{% endif %} · {% if patient.bed %}{{ patient.bed.number }}{% else %}—{% endif %}</strong></div>
+      <div><span>Admitted</span><strong>{{ patient.admitted }}</strong></div>
+      <div><span>Attending doctor</span><strong>{{ patient.doctor }}</strong></div>
+      <div><span>District</span><strong>{{ patient.district|default:'Not recorded' }}</strong></div>
+      <div><span>Contact</span><strong>{{ patient.phone }}</strong></div>
+    </div>
+    <div class="facts">
+      <dt>Symptoms</dt><dd>{{ patient.symptoms }}</dd>
+      <dt>Oxygen support</dt><dd>{% if patient.oxygen %}Yes{% else %}No{% endif %}</dd>
+      <dt>Discharge status</dt><dd>{% if patient.discharged %}Discharged{% else %}Currently admitted{% endif %}</dd>
+      <dt>Severity</dt><dd><span class="sev {{ patient.severity|lower }}">{{ patient.severity }}</span></dd>
+    </div>
+  </article>
+
+  <aside class="detail-side">
+    <article class="panel">
+      <div class="panel-head">
+        <div>
+          <p class="overline">Clinical observations</p>
+          <h3 class="display-m">Recorded information</h3>
+        </div>
+      </div>
+      <p class="empty-row">No vitals have been recorded for this patient.</p>
+    </article>
+
+    <article class="panel">
+      <div class="panel-head">
+        <div>
+          <p class="overline">Care timeline</p>
+          <h3 class="display-m">Care events</h3>
+        </div>
+      </div>
+      <ol class="trail">
+        <li><strong>Admitted</strong><span>{{ patient.admitted }} · {{ patient.ward }}</span></li>
+        {% if patient.doctor %}<li><strong>Attending clinician</strong><span>{{ patient.doctor.name }} · {{ patient.severity }} severity</span></li>{% endif %}
+        {% if patient.discharged %}
+        <li class="done"><strong>Discharged</strong><span>{{ patient.discharged_at|date:'Y-m-d H:i' }}</span></li>
+        {% endif %}
+      </ol>
+    </article>
+    {% if not patient.discharged %}
+    <form method="post" action="{% url 'hms:patient_discharge' patient.pk %}" class="panel">
+      {% csrf_token %}
+      <button class="btn" type="submit">Record discharge</button>
+    </form>
+    {% endif %}
+  </aside>
+</section>
+
+{% endblock %}
+
+{% block extra_js %}{% endblock %}

@@ -1,0 +1,44 @@
+{% extends 'hms/base.html' %}
+{% load static %}
+
+{% block masthead %}
+<header class="masthead">
+  <div class="mast-left">
+    <a href="{% url 'hms:patients' %}" class="btn-ghost sm">← Back to directory</a>
+    <h1 class="display-m">{% if editing %}Edit patient record{% else %}New patient registration{% endif %}</h1>
+    <p class="lede">Patient details are stored in the configured hospital database.</p>
+  </div>
+  <div class="mast-right"></div>
+</header>
+{% endblock %}
+
+{% block content %}
+<section class="panel">
+  <div class="panel-head">
+    <div>
+      <p class="overline">Registration form</p>
+      <h3 class="display-m">{% if editing %}Update patient record{% else %}Create a new patient record{% endif %}</h3>
+    </div>
+    <a href="{% if editing %}{% url 'hms:patient_detail' patient.pk %}{% else %}{% url 'hms:patients' %}{% endif %}" class="btn-ghost">Cancel</a>
+  </div>
+
+  <form method="post" class="lux-form two-col" autocomplete="off">
+    {% csrf_token %}
+    {{ form.non_field_errors }}
+    {% for field in form %}
+      {% if field.name == 'oxygen' %}
+      <div class="field"><label class="lux-check">{{ field }} {{ field.label }}</label>
+      {% else %}
+      <div class="field"><label for="{{ field.id_for_label }}">{{ field.label }}</label>{{ field }}
+      {% endif %}
+        {% for error in field.errors %}<small class="form-error">{{ error }}</small>{% endfor %}
+      </div>
+    {% endfor %}
+
+    <div class="form-actions">
+      <a href="{% if editing %}{% url 'hms:patient_detail' patient.pk %}{% else %}{% url 'hms:patients' %}{% endif %}" class="btn-ghost">Cancel</a>
+      <button type="submit" class="btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px;"><polyline points="20,6 9,17 4,12"/></svg> {% if editing %}Save changes{% else %}Register patient{% endif %}</button>
+    </div>
+  </form>
+</section>
+{% endblock %}

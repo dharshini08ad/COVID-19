@@ -1,0 +1,183 @@
+{% extends 'hms/base.html' %}
+{% load static %}
+
+{% block masthead %}
+<header class="masthead">
+  <div class="mast-left">
+    <p class="overline">Hospital command centre <em style="color:var(--pink);font-style:normal;">·</em> {{ today|date:'j M Y' }}</p>
+    <h1 class="display-l">COVID-19 operations</h1>
+    <p class="lede">Current patient, appointment and bed records from the hospital database.</p>
+  </div>
+  <div class="mast-search">
+    <form class="util-search" method="get" action="{% url 'hms:patients' %}">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px;"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input type="search" name="q" placeholder="Search patients by name, UHID or doctor…" aria-label="Search patients by name, UHID or doctor">
+    </form>
+  </div>
+  <div class="mast-right">
+    <p class="status-line"><span class="pulse"></span>Database connected</p>
+  </div>
+</header>
+{% endblock %}
+
+{% block content %}
+<form method="get" action="{% url 'hms:dashboard' %}" class="search-band" aria-label="Dashboard date range">
+  <label for="dashboardStart">From</label><input id="dashboardStart" type="date" name="start" value="{{ start_date }}" required>
+  <label for="dashboardEnd">To</label><input id="dashboardEnd" type="date" name="end" value="{{ end_date }}" required>
+  <button class="btn" type="submit">Update dashboard</button>
+</form>
+<div class="ed-grid">
+
+  <!-- COVID case overview — feature panel with large focal number -->
+  <article class="ed-feature panel panel--navy">
+    <div class="panel-head">
+      <div>
+        <p class="overline on-dark">COVID-19 case overview</p>
+        <h2 class="display-m">Active COVID-19 cases</h2>
+      </div>
+    </div>
+    <p class="num-l feature-number">{{ stats.active_cases }}</p>
+    <p class="feature-sub"><span class="tick" style="color:var(--pink);"></span>{{ stats.total_patients }} registered · {{ stats.today_admissions }} admitted today · {{ stats.today_discharges }} discharged today</p>
+    <ul class="feature-wards">
+      <li><strong>{{ stats.active_cases }}</strong><em>active</em></li>
+      <li><strong>{{ stats.critical_patients }}</strong><em>critical</em></li>
+      <li><strong>{{ stats.new_admissions_period }}</strong><em>new positive cases</em></li>
+      <li><strong>{{ stats.recoveries_period }}</strong><em>recoveries recorded</em></li>
+    </ul>
+  </article>
+
+  <!-- Key metrics stat strip -->
+  <article class="ed-stats panel">
+    <div class="stat-strip">
+      <div class="stat">
+        <p class="stat-note">Registered patients</p>
+        <p class="stat-num num-m">{{ stats.total_patients }}</p>
+      </div>
+      <div class="stat">
+        <p class="stat-note">Active cases</p>
+        <p class="stat-num num-m">{{ stats.active_cases }}</p>
+      </div>
+      <div class="stat">
+        <p class="stat-note">Beds available</p>
+        <p class="stat-num num-m">{{ stats.beds_available }}<small> available / {{ stats.beds_total }} total</small></p>
+      </div>
+      <div class="stat">
+        <p class="stat-note">Appointments today</p>
+        <p class="stat-num num-m">{{ stats.today_appointments }}</p>
+      </div>
+    </div>
+  </article>
+
+  <!-- Historical COVID trend chart -->
+  <article class="ed-trend panel">
+    <div class="panel-head">
+      <div>
+        <p class="overline">Case trend — selected period</p>
+        <h3 class="display-m">New cases vs recoveries</h3>
+      </div>
+      <div class="trend-meta">
+        <span class="trend-key navy">New cases</span>
+        <span class="trend-key">Recovered</span>
+      </div>
+    </div>
+    {% if has_patient_data %}<div class="chart-frame tall">
+      <canvas id="caseTrendChart"></canvas>
+    </div>{% else %}<p class="empty-row">No patient records are available to chart yet. Register a patient to start tracking trends.</p>{% endif %}
+  </article>
+
+  <!-- ICU / bed availability resource rail -->
+  <article class="ed-res panel">
+    <div class="panel-head">
+      <div>
+        <p class="overline">Capacity indicators</p>
+        <h3 class="display-m">ICU &amp; beds</h3>
+      </div>
+    </div>
+    <div class="res-stack">
+      {% for b in beds %}
+      <div class="res-item">
+        <div class="res-copy">
+          <p>{{ b.ward }}</p>
+          <p class="num-m">{{ b.available }}<small> / {{ b.total }} free</small></p>
+        </div>
+        <div class="v-track" style="min-height:80px;">
+          <div class="v-fill deep" style="height:{% widthratio b.occupied b.total 100 %}%;"></div>
+        </div>
+      </div>
+      {% empty %}<p class="empty-row">Bed inventory is not configured.</p>
+      {% endfor %}
+    </div>
+  </article>
+
+</div>
+
+<!-- Capacity board (full width) -->
+<section class="ed-cap panel">
+  <div class="panel-head">
+    <div>
+      <p class="overline">Hospital capacity</p>
+      <h3 class="display-m">Bed occupancy by ward</h3>
+    </div>
+  </div>
+  <div class="board">
+    {% for b in beds %}
+    {% widthratio b.occupied b.total 100 as pct %}
+    <div class="board-row">
+      <div class="board-ward">{{ b.ward }}<small>{{ b.occupied }} occupied · {{ b.available }} free</small></div>
+      <div class="board-nums">
+        <div><strong>{{ b.total }}</strong><span>Total</span></div>
+        <div><strong>{{ b.occupied }}</strong><span>Occupied</span></div>
+        <div><strong class="free">{{ b.available }}</strong><span>Available</span></div>
+      </div>
+      <span class="occ-chip {% if pct > 85 %}high{% elif pct > 60 %}mid{% else %}low{% endif %}">{{ pct }}%</span>
+    </div>
+    {% empty %}<p class="empty-row">No beds are registered. Configure wards and beds before tracking occupancy.</p>
+    {% endfor %}
+  </div>
+</section>
+
+<!-- Recent admissions timeline + operational alerts -->
+<div class="ed-grid" style="margin-top:20px;">
+  <article class="ed-time panel">
+    <div class="panel-head">
+      <div>
+        <p class="overline">Recent admissions</p>
+        <h3 class="display-m">Latest check-ins</h3>
+      </div>
+      <a href="{% url 'hms:patients' %}" class="btn-ghost sm">View all <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px;"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12,5 19,12 12,19"/></svg></a>
+    </div>
+    <ol class="chron">
+      {% for p in recent_admissions %}
+      <li>
+        <time>{{ p.admitted }}</time>
+        <div>
+           <p class="who-line"><a href="{% url 'hms:patient_detail' p.pk %}">{{ p.name }}</a><small>{% if p.ward %}{{ p.ward.name }}{% else %}Ward unassigned{% endif %} · {{ p.covid_status }}</small></p>
+        </div>
+        <span class="flag {% if p.covid_status == 'Positive' %}positive{% elif p.covid_status == 'Recovered' %}recovered{% else %}negative{% endif %}"></span>
+      </li>
+      {% empty %}<li><p class="empty-row">No patient admissions have been recorded. <a href="{% url 'hms:patient_register' %}">Register a patient</a>.</p></li>
+      {% endfor %}
+    </ol>
+  </article>
+
+  <article class="ed-ins panel panel--blush">
+    <div class="panel-head">
+      <div>
+        <p class="overline">Operational alerts</p>
+        <h3 class="display-m">Attention required</h3>
+      </div>
+    </div>
+     <p class="insight-quote"><em>{{ stats.available_staff }} available staff · {{ stats.critical_patients }} critical patients currently admitted.</em></p>
+    <ul class="chron" style="border-top:0;">
+       <li style="padding:8px 0;border-top:1px solid var(--line-soft);"><span class="flag positive"></span><div><p class="who-line" style="font-size:.78rem;">Beds occupied <small>{{ stats.beds_occupied }} of {{ stats.beds_total }} registered</small></p></div></li>
+      <li style="padding:8px 0;border-top:1px solid var(--line-soft);"><span class="flag"></span><div><p class="who-line" style="font-size:.78rem;">Selected-period outcomes <small>{{ stats.new_admissions_period }} new positive cases · {{ stats.recoveries_period }} recoveries</small></p></div></li>
+    </ul>
+  </article>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+{{ dashboard_chart_data|json_script:'dashboard-data' }}
+<script>window.__DASH_DATA__ = JSON.parse(document.getElementById('dashboard-data').textContent);</script>
+<script src="{% static 'js/dashboard-charts.js' %}"></script>
+{% endblock %}

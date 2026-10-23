@@ -453,8 +453,21 @@ def analytics(request):
         discharged_at__date__range=(start, end),
     ).exists()
     hive_query_result = request.session.pop('hive_query_result', None)
-    if not hive_query_result:
+    hive_query_last = request.session.pop('hive_query_result_last_query', None)
+
+    if hive_query_result:
+        # Ensure the stored result has all expected fields
+        if 'engine_status' not in hive_query_result:
+            hive_query_result['engine_status'] = 'LOCAL_SIMULATION'
+        if 'status' not in hive_query_result:
+            hive_query_result['status'] = 'SUCCESS'
+        if 'hive_engine_configured' not in hive_query_result:
+            hive_query_result['hive_engine_configured'] = False
+        if 'hdfs_engine_configured' not in hive_query_result:
+            hive_query_result['hdfs_engine_configured'] = False
+    else:
         hive_query_result = simulate_hive_query('district_wise')
+        hive_query_last = 'district_wise'
 
     return render(request, 'hms/analytics.html', {
         'page_title': 'Hospital analytics', 'active': 'analytics',
@@ -469,6 +482,7 @@ def analytics(request):
         'districts': districts, 'has_patient_data': has_period_data,
         'start_date': start.isoformat(), 'end_date': end.isoformat(),
         'hive_query_result': hive_query_result,
+        'hive_query_last': hive_query_last,
         'hive_presets': PRESET_HIVE_QUERIES,
     })
 
@@ -589,15 +603,37 @@ def bigdata_export(request):
     filename, record_count = export_to_hdfs_format(data_type)
 
     if filename:
-        with open(filename, 'r', encoding='utf-8') as f:
-            response = HttpResponse(f.read(), content_type='text/csv')
-            response['Content-Disposition'] = f'attachment; filename="{os.path.basename(filename)}"'
-        os.unlink(filename)
-        messages.success(request, f'Exported {record_count} records to CSV format for HDFS upload.')
-        return response
+        # Verify file exists and has content
+        if os.path.exists(filename) and os.path.getsize(filename) > 0:
+            try:
+                with open(filename, 'r', encoding='utf-8') as f:
+                    content = f.read()
+                response = HttpResponse(content, content_type='text/csv')
+                response['Content-Disposition'] = f'attachment; filename="{os.path.basename(filename)}"'
+                messages.success(request, f'Exported {record_count} records to CSV format for HDFS upload.')
+                # Clean up temp file
+                try:
+                    os.unlink(filename)
+                except OSError:
+                    pass
+                return response
+            except Exception as read_err:
+                messages.error(request, f'Exported {record_count} records, but failed to read file: {str(read_err)}')
+                # Still clean up
+                try:
+                    os.unlink(filename)
+                except OSError:
+                    pass
+        else:
+            messages.error(request, 'Export failed: file was created but is empty or does not exist.')
+            try:
+                os.unlink(filename)
+            except OSError:
+                pass
     else:
         messages.error(request, 'Invalid data type for export.')
-        return redirect('hms:analytics')
+
+    return redirect('hms:analytics')
 
 
 @login_required
@@ -606,14 +642,33 @@ def bigdata_query(request):
     custom_sql = request.GET.get('sql', '').strip()
     next_url = request.GET.get('next')
 
-    result = simulate_hive_query(query_type, custom_sql=custom_sql if custom_sql else None)
+    try:
+        result = simulate_hive_query(query_type, custom_sql=custom_sql if custom_sql else None)
 
-    if result['results']:
-        messages.success(request, f"HiveQL query '{result['title']}' executed successfully in {result['execution_time_seconds']}s (scanned {result['rows_scanned']:,} records via MapReduce).")
-    else:
-        messages.info(request, 'Hive query execution returned 0 rows.')
+        if result['results']:
+            messages.success(request, f"HiveQL query '{result['title']}' executed successfully in {result['execution_time_seconds']}s (scanned {result['rows_scanned']:,} records). Status: {result['engine_status']}")
+        else:
+            messages.info(request, 'Hive query execution returned 0 rows.')
 
-    request.session['hive_query_result'] = result
+        # Store in session with a copy to avoid reference issues
+        request.session['hive_query_result'] = dict(result)
+        request.session['hive_query_result_last_query'] = query_type
+
+    except Exception as e:
+        messages.error(request, f'Hive query execution failed: {str(e)}')
+        # Store error state in session
+        request.session['hive_query_result'] = {
+            'query_type': query_type,
+            'title': 'Error Query',
+            'status': 'ERROR',
+            'error_message': str(e),
+            'rows': [],
+            'headers': [],
+            'results': [],
+            'engine_status': 'LOCAL_SIMULATION (Hive engine unavailable)',
+        }
+        request.session['hive_query_result_last_query'] = query_type
+
     if next_url:
         return redirect(next_url)
     return redirect('hms:analytics')

@@ -316,24 +316,33 @@
     </div>
     <div style="display:flex;gap:12px;align-items:center;">
       <span class="tag" style="background:var(--navy);color:var(--cream);">Job ID: {{ hive_query_result.job_id|default:'job_17293500_001' }}</span>
-      <span class="tag" style="background:#0F5132;color:#D1E7DD;">OK {{ hive_query_result.execution_time_seconds }}s</span>
+      {% if hive_query_result.status == 'SUCCESS' %}
+        <span class="tag" style="background:#0F5132;color:#D1E7DD;">OK {{ hive_query_result.execution_time_seconds }}s</span>
+      {% elif hive_query_result.status == 'ERROR' %}
+        <span class="tag" style="background:#842029;color:#F8D7DA;">ERROR {{ hive_query_result.execution_time_seconds }}s</span>
+      {% else %}
+        <span class="tag" style="background:#1D4ED8;color:#EFF6FF;">RUNNING {{ hive_query_result.execution_time_seconds }}s</span>
+      {% endif %}
     </div>
   </div>
 
   <div style="display:flex;gap:18px;flex-wrap:wrap;margin-bottom:14px;font-size:.82rem;color:var(--muted);">
+    <div><strong>Status:</strong> <span style="color:var(--success);">{{ hive_query_result.status|default:'OK' }}</span></div>
+    <div><strong>Execution Engine:</strong> <span style="color:var(--navy);">{{ hive_query_result.engine_status|default:'LOCAL_SIMULATION' }}</span></div>
     <div><strong>Runtime:</strong> {{ hive_query_result.execution_time_seconds }} seconds</div>
-    <div><strong>Rows Scanned:</strong> {{ hive_query_result.rows_scanned }} records</div>
-    <div><strong>HDFS Read:</strong> {{ hive_query_result.hdfs_bytes_read|filesizeformat|default:'2.4 MB' }}</div>
-    <div><strong>Execution Engine:</strong> MapReduce v2 (Tez DAG Pipeline)</div>
+    <div><strong>Rows Scanned:</strong> {{ hive_query_result.rows_scanned|default:'0' }} records</div>
+    <div><strong>HDFS Read:</strong> {{ hive_query_result.hdfs_bytes_read|filesizeformat|default:'0 B' }}</div>
+    {% if hive_query_result.hdfs_bytes_written %}
+    <div><strong>HDFS Written:</strong> {{ hive_query_result.hdfs_bytes_written|filesizeformat }}</div>
+    {% endif %}
   </div>
 
-  {% if hive_query_result.sql %}
-  <details style="margin-bottom:16px;background:var(--cream-2);border-radius:6px;padding:8px 14px;font-size:.82rem;">
-    <summary style="cursor:pointer;font-weight:700;color:var(--navy);">View Compiled HiveQL Query &amp; MapReduce Execution Plan</summary>
-    <pre class="mono" style="margin-top:8px;padding:12px;background:#11152F;color:#F7F0E6;border-radius:4px;overflow-x:auto;font-size:.76rem;line-height:1.45;">{{ hive_query_result.mapreduce_log|default:hive_query_result.sql }}</pre>
-  </details>
-  {% endif %}
-
+  {% if hive_query_result.status == 'ERROR' %}
+  <div style="background:#FFF5F5;border:1px solid #F5C2C7;border-radius:6px;padding:12px 16px;font-size:.85rem;color:#842029;">
+    <strong>Query Failed:</strong>
+    <div style="white-space:pre-wrap;font-family:monospace;font-size:.76rem;margin-top:6px;overflow-x:auto;">{{ hive_query_result.error_message|default:'Unknown error occurred' }}</div>
+  </div>
+  {% elif hive_query_result.rows or hive_query_result.results %}
   <div class="table-responsive scroller">
     <table class="ledger">
       <thead>
@@ -376,6 +385,16 @@
       </tbody>
     </table>
   </div>
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-top:10px;font-size:.75rem;color:var(--muted-2);">
+    <div><strong>Total Rows:</strong> {{ hive_query_result.rows|length|default:hive_query_result.results|length|default:0 }}</div>
+    <div><strong>Query Type:</strong> {{ hive_query_result.query_type|default:'custom' }}</div>
+  </div>
+  {% else %}
+  <div style="text-align:center;padding:24px;color:var(--muted-2);">
+    <p style="font-size:1.1rem;margin:0 0 8px;">⏳ Query execution in progress...</p>
+    <p class="micro">Please wait while the Hive query runs against the data lake.</p>
+  </div>
+  {% endif %}
 </section>
 {% endif %}
 
